@@ -29,8 +29,13 @@ def imshow(inp, title=None, plt_ax=plt, default=False):
     plt_ax.grid(False)
 
 
-for path in ( image_path_acne, image_path_dry,  image_path_oil):
-    label, dlass_id, probs = sc.analyze(path)
-    print(label, probs)
-    imshow(sc.image())
-    plt.show()
+# for path in (image_path_acne, image_path_dry,  image_path_oil):
+#     label, dlass_id, probs = sc.analyze(path)
+#     print(label, probs)
+#     # imshow(sc.image())
+#     # plt.show()
+
+# вызов анализа конкретного файла
+def analyze(image_path: str) -> tuple:
+    label, dlass_id, probs = sc.analyze(image_path)
+    return label, probs
