@@ -38,62 +38,76 @@
             </div>
 
             <script>
-                $('#uploadForm').on('submit', function(e) {
-                    e.preventDefault();
+    $('#uploadForm').on('submit', function(e) {
+        e.preventDefault();
 
-                    const formData = new FormData(this);
-                    $.ajax({
-                        url: '/upload',
-                        type: 'POST',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(uploadResp) {
-                            // после загрузки вызываем анализ
-                            $.ajax({
-                                url: '/analyze',
-                                type: 'POST',
-                                data: {
-                                    age: $('input[name="age"]').val(),
-                                    gender: $('input[name="gender"]:checked').val(),
-                                    allergies: $('select[name="allergies"]').val(),
-                                    filename: uploadResp.filename
-                                },
-                                success: function(response) {
-                                    let html = `<h3>Результат анализа</h3>
-                                                <p><strong>Вероятности:</strong> ${response.probs}</p>
-                                                <p><strong>Метка:</strong> ${response.label}</p>`;
-
-                                    html += `<h3>История</h3>
-                                             <table>
-                                                 <thead>
-                                                     <tr>
-                                                         <th>ID</th>
-                                                         <th>Возраст</th>
-                                                         <th>Пол</th>
-                                                         <th>Аллергия</th>
-                                                         <th>Метка</th>
-                                                         <th>Вероятности</th>
-                                                     </tr>
-                                                 </thead>
-                                                 <tbody>`;
-                                    response.history.forEach(row => {
-                                        html += `<tr>
-                                                    <td>${row.id}</td>
-                                                    <td>${row.age}</td>
-                                                    <td>${row.gender}</td>
-                                                    <td>${row.allergies}</td>
-                                                    <td>${row.label}</td>
-                                                    <td>${row.probs}</td>
-                                                 </tr>`;
-                                    });
-                                    html += '</tbody></table>';
-                                    $('#result').html(html);
-                                }
-                            });
+        const formData = new FormData(this);
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(uploadResp) {
+                // После загрузки — анализ
+                $.ajax({
+                    url: '/analyze',
+                    type: 'POST',
+                    data: {
+                        age: $('input[name="age"]').val(),
+                        gender: $('input[name="gender"]:checked').val(),
+                        allergies: $('select[name="allergies"]').val(),
+                        filename: uploadResp.filename
+                    },
+                    success: function(response) {
+                        if (response.error) {
+                            $('#result').html(`<div class="error">Ошибка: ${response.error}</div>`);
+                            return;
                         }
-                    });
+
+                        let html = `<h3>Результат анализа</h3>
+                                    <p><strong>Вероятности:</strong> ${response.probs}</p>
+                                    <p><strong>Метка:</strong> ${response.label}</p>`;
+
+                        html += `<h3>История</h3>
+                                 <table>
+                                     <thead>
+                                         <tr>
+                                             <th>ID</th>
+                                             <th>Возраст</th>
+                                             <th>Пол</th>
+                                             <th>Аллергия</th>
+                                             <th>Метка</th>
+                                             <th>Вероятности</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody>`;
+                        response.history.forEach(row => {
+                            html += `<tr>
+                                        <td>${row.id}</td>
+                                        <td>${row.age}</td>
+                                        <td>${row.gender}</td>
+                                        <td>${row.allergies}</td>
+                                        <td>${row.label}</td>
+                                        <td>${row.probs}</td>
+                                     </tr>`;
+                        });
+                        html += '</tbody></table>';
+                        $('#result').html(html);
+                    },
+                    error: function(xhr) {
+                        const errorMsg = xhr.responseJSON?.error || 'Неизвестная ошибка при анализе';
+                        $('#result').html(`<div class="error">Ошибка: ${errorMsg}</div>`);
+                    }
                 });
-            </script>
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON?.error || 'Не удалось загрузить изображение';
+                $('#result').html(`<div class="error">Ошибка: ${errorMsg}</div>`);
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

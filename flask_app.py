@@ -3,6 +3,7 @@ import os
 import sqlite3
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
+import time
 
 from inference import analyze
 
@@ -20,7 +21,9 @@ def upload_file():
     if not file:
         return jsonify({'error': 'Не загружен файл изображения'}), 400
 
-    filename = secure_filename(file.filename)
+    # Генерация уникального имени файла с использованием времени
+    timestamp = int(time.time())
+    filename = f"{timestamp}_{secure_filename(file.filename)}"
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
 
@@ -28,63 +31,66 @@ def upload_file():
 
 @app.route('/analyze', methods=['POST'])
 def handler():
-    age = request.form.get('age')
-    gender = request.form.get('gender')
-    allergies = request.form.get('allergies')
-    filename = request.form.get('filename')
+    try:
+        age = request.form.get('age')
+        gender = request.form.get('gender')
+        allergies = request.form.get('allergies')
+        filename = request.form.get('filename')
 
-    if not all([age, gender, allergies, filename]):
-        return jsonify({'error': 'Не все данные заполнены'}), 400
+        if not all([age, gender, allergies, filename]):
+            return jsonify({'error': 'Не все данные заполнены'}), 400
 
-    #analyze
-    label, probs = analyze(filename)
-    probs_str = ', '.join([f"{p:.2f}" for p in probs]) if hasattr(probs, '__iter__') else str(probs)
+        #analyze
+        label, probs = analyze(filename)
+        probs_str = ', '.join([f"{p:.2f}" for p in probs]) if hasattr(probs, '__iter__') else str(probs)
 
 
-    #sqlite
-    conn = sqlite3.connect('data.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS analysis_results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            age INTEGER,
-            gender TEXT,
-            allergies TEXT,
-            label TEXT,
-            probs TEXT,
-            filename TEXT
+        #sqlite
+        conn = sqlite3.connect('data.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS analysis_results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                age INTEGER,
+                gender TEXT,
+                allergies TEXT,
+                label TEXT,
+                probs TEXT,
+                filename TEXT
+            )
+        ''')
+        cursor.execute(
+            'INSERT INTO analysis_results (label, probs, age, gender, allergies, filename) VALUES (?, ?, ?, ?, ?, ?)',
+            (label, probs_str, age, gender, allergies, filename)
         )
-    ''')
-    cursor.execute(
-        'INSERT INTO analysis_results (label, probs, age, gender, allergies, filename) VALUES (?, ?, ?, ?, ?, ?)',
-        (label, probs_str, age, gender, allergies, filename)
-    )
-    conn.commit()
+        conn.commit()
 
-    # Получаем всю историю
-    cursor.execute('SELECT id, age, gender, allergies, label, probs FROM analysis_results ORDER BY id DESC')
-    rows = cursor.fetchall()
-    conn.close()
+        # Получаем всю историю
+        cursor.execute('SELECT id, age, gender, allergies, label, probs FROM analysis_results ORDER BY id DESC')
+        rows = cursor.fetchall()
+        conn.close()
 
-    history = [
-        {
-            'id': row[0],
-            'age': row[1],
-            'gender': row[2],
-            'allergies': row[3],
-            'label': row[4],
-            'probs': row[5]
+        history = [
+            {
+                'id': row[0],
+                'age': row[1],
+                'gender': row[2],
+                'allergies': row[3],
+                'label': row[4],
+                'probs': row[5]
+            }
+            for row in rows
+        ]
+
+        result = {
+            'label': label,
+            'probs': probs_str,
+            'history': history
         }
-        for row in rows
-    ]
 
-    result = {
-        'label': label,
-        'probs': probs_str,
-        'history': history
-    }
-
-    return jsonify(result)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':
