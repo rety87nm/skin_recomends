@@ -4,13 +4,13 @@ import sqlite3
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 import time
+import config
 
 from SkinTypeChecker import SkinTypeChecker
 
 app = Flask(__name__)
 
-model_path = "mobilenetv2.pth"
-sc = SkinTypeChecker(model_path)
+sc = SkinTypeChecker(config.model_path)
 
 UPLOAD_FOLDER = 'temp'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)

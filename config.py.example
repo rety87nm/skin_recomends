@@ -1,0 +1,6 @@
+
+# Абсолтный путь где лежат сохраненные веса модели:
+model_path = "/home/alexx/deep_learning/data/skin_types/mobilenetv2.pth"
+
+# TG token замените на свой
+tg_token = "7894235349:..."

@@ -9,19 +9,20 @@ from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
-from inference import analyze
+from SkinTypeChecker import SkinTypeChecker
+import config
 
 # настройки
-TOKEN = "7894235349:AAHITeKYoFFdC9zKVMz0cns06psVcmdKvAY"
 TEMP_FOLDER = "temp"
 os.makedirs(TEMP_FOLDER, exist_ok=True)
 
+sc = SkinTypeChecker(config.model_path)
 
 dp = Dispatcher()
 router = Router()
 dp.include_router(router)
 
-bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token=config.tg_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 #стартовое сообщение
 @router.message(CommandStart())
@@ -36,9 +37,8 @@ async def handle_photo(message: Message):
     photo_path = f"{TEMP_FOLDER}/{photo.file_id}.jpg"
     await bot.download_file(file.file_path, destination=photo_path)
 
-    result = analyze(photo_path)
+    result = sc.analyze(photo_path)
     await message.answer(f"Результат анализа:\n{result}")
-
 
 async def main():
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
