@@ -1,4 +1,4 @@
-import json
+from PIL import Image
 import os
 import sqlite3
 from flask import Flask, render_template, request, jsonify
@@ -21,13 +21,21 @@ def upload_file():
     if not file:
         return jsonify({'error': 'Не загружен файл изображения'}), 400
 
-    # Генерация уникального имени файла с использованием времени
+    #Генерация уникального имени файла с использованием времени
     timestamp = int(time.time())
     filename = f"{timestamp}_{secure_filename(file.filename)}"
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
 
-    return jsonify({'filename': filepath})
+    #Открытие изображения и конвертация в JPG
+    try:
+        img = Image.open(file)
+        jpg_filepath = os.path.splitext(filepath)[0] + '.jpg'
+        img.convert('RGB').save(jpg_filepath, 'JPEG')
+    except Exception as e:
+        return jsonify({'error': f'Ошибка при обработке изображения: {str(e)}'}), 500
+
+    return jsonify({'filename': jpg_filepath})
 
 @app.route('/analyze', methods=['POST'])
 def handler():
