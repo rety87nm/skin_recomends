@@ -19,16 +19,18 @@
 
             <label>Пол:</label>
             <div class="radio-group">
-                <label><input type="radio" name="gender" value="male" required> Мужской</label>
-                <label><input type="radio" name="gender" value="female"> Женский</label>
+                <label><input type="radio" name="gender" value="муж" required> Мужской</label>
+                <label><input type="radio" name="gender" value="жен"> Женский</label>
             </div>
             <label>Есть ли аллергия:</label>
             <select name="allergies" required>
                 <option value="">Выберите из списка</option>
-                <option value="none">Нет</option>
-                <option value="pollen">Пыльца</option>
-                <option value="dust">Пыль</option>
-                <option value="peanuts">Арахис</option>
+                <option value="нет">Нет</option>
+                <option value="пыльца">Пыльца</option>
+                <option value="пыль">Пыль</option>
+                <option value="арахис">Арахис</option>
+                <option value="шерсть">Шерсть</option>
+                <option value="молоко">Молоко</option>
             </select><br>
 
             <button type="submit">Отправить</button>
@@ -66,8 +68,8 @@
                         }
 
                         let html = `<h3>Результат анализа</h3>
-                                    <p><strong>Вероятности:</strong> ${response.probs}</p>
-                                    <p><strong>Метка:</strong> ${response.label}</p>`;
+                                    <p><strong>Тип кожи:</strong> ${response.probs}</p>
+                                    <p><strong>Доминирующий тип:</strong> ${response.label}</p>`;
 
                         html += `<h3>История</h3>
                                  <table>

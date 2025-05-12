@@ -15,6 +15,7 @@ class SkinTypeChecker():
     def __init__(self, model_path=""):
         super().__init__()
         self.classes = ['acne', 'dry', 'oil', 'normal', 'combine']
+        self.ru_classes = ['Акне', 'Сухая', 'Жирная', 'Нормальная', 'Комбинированная']
         self.model = MobileNetCnn(pretrained=False).to(device)
         self.model.load_state_dict( torch.load(model_path, map_location=device) )
 

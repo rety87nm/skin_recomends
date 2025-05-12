@@ -54,8 +54,9 @@ def handler():
 
         #analyze
         label, class_id, probs = sc.analyze(filename)
-        probs_str = ', '.join([f"{p:.2f}" for p in probs]) if hasattr(probs, '__iter__') else str(probs)
+        ru_label = sc.ru_classes[class_id]
 
+        probs_str = ', '.join([f" {sc.ru_classes[class_id]} {int(p*100)}%" for class_id, p in enumerate(probs)]) if hasattr(probs, '__iter__') else str(probs)
 
         #sqlite
         conn = sqlite3.connect('data.db')
@@ -73,7 +74,7 @@ def handler():
         ''')
         cursor.execute(
             'INSERT INTO analysis_results (label, probs, age, gender, allergies, filename) VALUES (?, ?, ?, ?, ?, ?)',
-            (label, probs_str, age, gender, allergies, filename)
+            (ru_label, probs_str, age, gender, allergies, filename)
         )
         conn.commit()
 
@@ -95,7 +96,7 @@ def handler():
         ]
 
         result = {
-            'label': label,
+            'label': ru_label,
             'probs': probs_str,
             'history': history
         }
