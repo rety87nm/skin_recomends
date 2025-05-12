@@ -1,100 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Image Upload and Analysis</title>
+    <title>Рекомендации по уходу за кожей</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Upload Image for Analysis</h1>
+        <h1>Рекомендации по уходу за кожей</h1>
 
         <form id="uploadForm" enctype="multipart/form-data">
-            <label>Upload Image:</label>
+            <label>Загрузите фотографию:</label>
             <input type="file" name="image" required><br>
 
-            <label>Age:</label>
+            <label>Возраст (от 1 до 120):</label>
             <input type="number" name="age" id="age" min="1" max="120" required>
 
-            <label>Gender:</label>
+            <label>Пол:</label>
             <div class="radio-group">
-                <label><input type="radio" name="gender" value="male" required> Male</label>
-                <label><input type="radio" name="gender" value="female"> Female</label>
+                <label><input type="radio" name="gender" value="male" required> Мужской</label>
+                <label><input type="radio" name="gender" value="female"> Женский</label>
             </div>
-
-            <label>Allergies:</label>
+            <label>Есть ли аллергия:</label>
             <select name="allergies" required>
-                <option value="">Select</option>
-                <option value="none">None</option>
-                <option value="pollen">Pollen</option>
-                <option value="dust">Dust</option>
-                <option value="peanuts">Peanuts</option>
+                <option value="">Выберите из списка</option>
+                <option value="none">Нет</option>
+                <option value="pollen">Пыльца</option>
+                <option value="dust">Пыль</option>
+                <option value="peanuts">Арахис</option>
             </select><br>
 
-            <button type="submit">Upload</button>
-        </form>
+            <button type="submit">Отправить</button>
+            </form>
 
-        <div id="result"></div>
-    </div>
+            <div id="result"></div>
+            </div>
 
-    <script>
-        $('#uploadForm').on('submit', function(e) {
-            e.preventDefault();
+            <script>
+                $('#uploadForm').on('submit', function(e) {
+                    e.preventDefault();
 
-            const formData = new FormData(this);
-            $.ajax({
-                url: '/upload',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(uploadResp) {
-                    // после загрузки вызываем анализ
+                    const formData = new FormData(this);
                     $.ajax({
-                        url: '/analyze',
+                        url: '/upload',
                         type: 'POST',
-                        data: {
-                            age: $('input[name="age"]').val(),
-                            gender: $('input[name="gender"]:checked').val(),
-                            allergies: $('select[name="allergies"]').val(),
-                            filename: uploadResp.filename
-                        },
-                        success: function(response) {
-                            let html = `<h3>Analysis Result</h3>
-                                        <p><strong>Probs:</strong> ${response.probs}</p>
-                                        <p><strong>Label:</strong> ${response.label}</p>`;
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(uploadResp) {
+                            // после загрузки вызываем анализ
+                            $.ajax({
+                                url: '/analyze',
+                                type: 'POST',
+                                data: {
+                                    age: $('input[name="age"]').val(),
+                                    gender: $('input[name="gender"]:checked').val(),
+                                    allergies: $('select[name="allergies"]').val(),
+                                    filename: uploadResp.filename
+                                },
+                                success: function(response) {
+                                    let html = `<h3>Результат анализа</h3>
+                                                <p><strong>Вероятности:</strong> ${response.probs}</p>
+                                                <p><strong>Метка:</strong> ${response.label}</p>`;
 
-                            html += `<h3>History</h3>
-                                     <table>
-                                         <thead>
-                                             <tr>
-                                                 <th>ID</th>
-                                                 <th>Age</th>
-                                                 <th>Gender</th>
-                                                 <th>Allergies</th>
-                                                 <th>Label</th>
-                                                 <th>Probs</th>
-                                             </tr>
-                                         </thead>
-                                         <tbody>`;
-                            response.history.forEach(row => {
-                                html += `<tr>
-                                            <td>${row.id}</td>
-                                            <td>${row.age}</td>
-                                            <td>${row.gender}</td>
-                                            <td>${row.allergies}</td>
-                                            <td>${row.label}</td>
-                                            <td>${row.probs}</td>
-                                         </tr>`;
+                                    html += `<h3>История</h3>
+                                             <table>
+                                                 <thead>
+                                                     <tr>
+                                                         <th>ID</th>
+                                                         <th>Возраст</th>
+                                                         <th>Пол</th>
+                                                         <th>Аллергия</th>
+                                                         <th>Метка</th>
+                                                         <th>Вероятности</th>
+                                                     </tr>
+                                                 </thead>
+                                                 <tbody>`;
+                                    response.history.forEach(row => {
+                                        html += `<tr>
+                                                    <td>${row.id}</td>
+                                                    <td>${row.age}</td>
+                                                    <td>${row.gender}</td>
+                                                    <td>${row.allergies}</td>
+                                                    <td>${row.label}</td>
+                                                    <td>${row.probs}</td>
+                                                 </tr>`;
+                                    });
+                                    html += '</tbody></table>';
+                                    $('#result').html(html);
+                                }
                             });
-                            html += '</tbody></table>';
-                            $('#result').html(html);
                         }
                     });
-                }
-            });
-        });
-    </script>
+                });
+            </script>
 </body>
 </html>

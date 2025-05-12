@@ -18,7 +18,7 @@ def index():
 def upload_file():
     file = request.files.get('image')
     if not file:
-        return jsonify({'error': 'No file uploaded'}), 400
+        return jsonify({'error': 'Не загружен файл изображения'}), 400
 
     filename = secure_filename(file.filename)
     filepath = os.path.join(UPLOAD_FOLDER, filename)
@@ -34,7 +34,7 @@ def handler():
     filename = request.form.get('filename')
 
     if not all([age, gender, allergies, filename]):
-        return jsonify({'error': 'Missing form data'}), 400
+        return jsonify({'error': 'Не все данные заполнены'}), 400
 
     #analyze
     label, probs = analyze(filename)
