@@ -5,14 +5,11 @@
 from SkinTypeChecker import SkinTypeChecker
 import matplotlib.pyplot as plt
 import numpy as np
+import config
 
-model_path = "mobilenetv2.pth"
+image_path_acne = "/home/alexx/deep_learning/data/uniq/skin_types/test1/acne/97_jpg.rf.8230f82167835d4948902f3a5dee9232.jpg"
 
-image_path_acne = "skin_types/test1/acne/19_jpg.rf.231a085ac891ea2bed663ee140b9aa21.jpg"
-image_path_dry = "skin_types/test1/dry/dry16_jpg.rf.ee2726f8440e10c24acba66999904b66.jpg"
-image_path_oil = "skin_types/test1/oil/images28_jpeg.rf.23fb36cda5a74bb378d89feb6925c5ac.jpg"
-
-sc = SkinTypeChecker(model_path)
+sc = SkinTypeChecker(config.model_path)
 
 def imshow(inp, title=None, plt_ax=plt, default=False):
     """Imshow для тензоров"""
@@ -29,11 +26,10 @@ def imshow(inp, title=None, plt_ax=plt, default=False):
     plt_ax.grid(False)
 
 
-for path in (image_path_acne, image_path_dry,  image_path_oil):
-     label, dlass_id, probs = sc.analyze(path)
-     print(label, probs)
-     imshow(sc.image())
-     plt.show()
+label, dlass_id, probs = sc.analyze(image_path_acne)
+print(label, probs)
+imshow(sc.image())
+plt.show()
 
 # вызов анализа конкретного файла
 def analyze(image_path: str) -> str:
