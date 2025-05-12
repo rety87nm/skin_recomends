@@ -5,9 +5,13 @@ from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 import time
 
-from inference import analyze
+from SkinTypeChecker import SkinTypeChecker
 
 app = Flask(__name__)
+
+model_path = "mobilenetv2.pth"
+sc = SkinTypeChecker(model_path)
+
 UPLOAD_FOLDER = 'temp'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -49,7 +53,7 @@ def handler():
             return jsonify({'error': 'Не все данные заполнены'}), 400
 
         #analyze
-        label, probs = analyze(filename)
+        label, class_id, probs = sc.analyze(filename)
         probs_str = ', '.join([f"{p:.2f}" for p in probs]) if hasattr(probs, '__iter__') else str(probs)
 
 

@@ -37,6 +37,6 @@ for path in (image_path_acne, image_path_dry,  image_path_oil):
 
 # вызов анализа конкретного файла
 def analyze(image_path: str) -> str:
-    label, dlass_id, probs = sc.analyze(image_path)
+    label, class_id, probs = sc.analyze(image_path)
     print(label, probs)
     return label
