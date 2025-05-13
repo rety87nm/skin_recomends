@@ -1,4 +1,4 @@
-# Как установить интерфейс:
+# Как установить:
 
 Скачиваем исходный код:
 1/ git clone ssh://git@github.com/rety87nm/skin_recomends.git
@@ -7,21 +7,24 @@
 cd skin_recomends
 wget -nc https://rety87nm.ru/share/mobilenetv2.pth -O mobilenetv2.pth
 
-3/ Изменяем данные к конфиге:
+3/ Скачиваем дамп данных:
+wget -nc https://rety87nm.ru/share/dump_20250513.sql -O data.db
+
+4/ Изменяем данные к конфиге:
 cp -v config.py.example config.py
 тут прописсываем токен бота
 
-4/ Готовим виртуальное окружение:
+5/ Готовим виртуальное окружение:
 $ cd ~
 $ python3 -m venv skin_types_venv
 $ cd skin_recomends
 $ source ../skin_types_venv/bin/activate
 
-5/ Устанавливаем зависимости:
+6/ Устанавливаем зависимости:
 pip install -r requirements.txt
 
-6/ Запуск телеграм бота:
+7/ Запуск телеграм бота:
 python3 telegram_input.py
 
-7/ запуск веб интерфейса:
+8/ запуск веб интерфейса:
 python3 flask_app.py
