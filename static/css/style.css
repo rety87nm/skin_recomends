@@ -69,3 +69,10 @@ table td {
 table th {
     background: #f0f0f0;
 }
+
+.table-image {
+    max-width: 64px;
+    height: auto;
+    border-radius: 5px;
+    object-fit: cover;
+}

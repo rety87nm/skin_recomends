@@ -28,9 +28,32 @@ def age_parts(age):
     else:
         return 5
 
+def load_history(cursor):
+    # Получаем 10 последних сообщений 
+    cursor.execute('SELECT ar.id, ar.age, ar.gender, ar.allergies, ar.label, ar.probs, ar.filename, t.text FROM analysis_results as ar, texts as t on t.id = ar.text_id ORDER BY ar.id DESC limit 10;')
+    rows = cursor.fetchall()
+    history = [
+        {
+            'id': row[0],
+            'age': row[1],
+            'gender': row[2],
+            'allergies': row[3],
+            'label': row[4],
+            'probs': row[5],
+            'filename':row[6],
+            'receipt':row[7]
+        }
+        for row in rows
+    ]
+    return history
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    conn = sqlite3.connect('data.db')
+    cursor = conn.cursor()
+    h = load_history(cursor)
+    conn.commit()
+    return render_template('index.html', history=h)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -38,21 +61,34 @@ def upload_file():
     if not file:
         return jsonify({'error': 'Не загружен файл изображения'}), 400
 
-    #Генерация уникального имени файла с использованием времени
+    # Генерация уникального имени файла с использованием времени
     timestamp = int(time.time())
     filename = f"{timestamp}_{secure_filename(file.filename)}"
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
 
-    #Открытие изображения и конвертация в JPG
+    # Открытие изображения и конвертация в JPG
     try:
-        img = Image.open(file)
-        jpg_filepath = os.path.splitext(filepath)[0] + '.jpg'
+        img = Image.open(filepath)
+        jpg_filename = f"{timestamp}_{os.path.splitext(file.filename)[0]}.jpg"
+        jpg_filepath = os.path.join(UPLOAD_FOLDER, jpg_filename)
         img.convert('RGB').save(jpg_filepath, 'JPEG')
+
+        thumbnail = img.copy()
+        thumbnail.thumbnail((64, 64))
+        thumbnail_dir = os.path.join('static', 'img')
+        os.makedirs(thumbnail_dir, exist_ok=True)
+        thumbnail_filename = f"thumb_{jpg_filename}"
+        thumbnail_filepath = os.path.join(thumbnail_dir, thumbnail_filename)
+        thumbnail.save(thumbnail_filepath, 'JPEG')
+
     except Exception as e:
         return jsonify({'error': f'Ошибка при обработке изображения: {str(e)}'}), 500
 
-    return jsonify({'filename': jpg_filepath})
+    return jsonify({
+        'filename': jpg_filename,
+        'thumbnail': thumbnail_filename
+    })
 
 @app.route('/analyze', methods=['POST'])
 def handler():
@@ -65,10 +101,9 @@ def handler():
         if not all([age, gender, allergies, filename]):
             return jsonify({'error': 'Не все данные заполнены'}), 400
 
-
-
         #Анализ фотографии на тип кожи
-        label, class_id, probs = sc.analyze(filename)
+        
+        label, class_id, probs = sc.analyze('temp/' + filename)
         ru_label = sc.ru_classes[class_id]
 
         probs_str = ', '.join([f" {sc.ru_classes[class_id]} {int(p*100)}%" for class_id, p in enumerate(probs)]) if hasattr(probs, '__iter__') else str(probs)
@@ -97,28 +132,12 @@ def handler():
         conn.commit()
 
         # Получаем 10 последних сообщений 
-        cursor.execute('SELECT ar.id, ar.age, ar.gender, ar.allergies, ar.label, ar.probs, t.text FROM analysis_results as ar, texts as t on t.id = ar.text_id ORDER BY ar.id DESC limit 10;')
-
-        rows = cursor.fetchall()
-        conn.close()
-
-        history = [
-            {
-                'id': row[0],
-                'age': row[1],
-                'gender': row[2],
-                'allergies': row[3],
-                'label': row[4],
-                'probs': row[5],
-                'receipt':row[6]
-            }
-            for row in rows
-        ]
+        history = load_history(cursor)
 
         result = {
             'label': ru_label,
             'probs': probs_str,
-            'receipt':history[0]['receipt'],
+            'receipt':history[0]['receipt'].replace("\n", "<br>"),
             'history': history
         }
 
