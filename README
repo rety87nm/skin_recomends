@@ -8,7 +8,7 @@ cd skin_recomends
 wget -nc https://rety87nm.ru/share/mobilenetv2.pth -O mobilenetv2.pth
 
 3/ Скачиваем дамп данных:
-wget -nc https://rety87nm.ru/share/dump_20250513.sql -O data.db
+wget -nc https://rety87nm.ru/share/skin_types_storage/data.db -O data.db
 
 4/ Изменяем данные к конфиге:
 cp -v config.py.example config.py

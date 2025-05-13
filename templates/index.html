@@ -15,7 +15,7 @@
             <input type="file" name="image" id="imageInput" accept="image/*" required><br>
             <img id="preview" src="#" alt="Предпросмотр изображения" style="display: none; max-width: 300px; margin-top: 10px;"><br>
 
-            <label>Возраст (от 1 до 120):</label>
+            <label>Возраст:</label>
             <input type="number" name="age" id="age" min="1" max="120" required>
 
             <label>Пол:</label>
@@ -42,34 +42,36 @@
         </form>
 
         <div id="result"></div>
-        <!-- Отображение истории при первоначальной загрузке -->
-        {% if history %}
-        <h3>История</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Фото</th>
-                    <th>Возраст</th>
-                    <th>Пол</th>
-                    <th>Аллергия</th>
-                    <th>Доминирующий</th>
-                    <th>Типы</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in history %}
-                <tr>
-                    <td><img src="/static/img/thumb_{{ row.filename }}" class="table-image"></td>
-                    <td>{{ row.age }}</td>
-                    <td>{{ row.gender }}</td>
-                    <td>{{ row.allergies }}</td>
-                    <td>{{ row.label }}</td>
-                    <td>{{ row.probs }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
+        <!-- Контейнер для истории -->
+        <div id="history">
+            {% if history %}
+            <h3>История</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Фото</th>
+                        <th>Возраст</th>
+                        <th>Пол</th>
+                        <th>Аллергия</th>
+                        <th>Доминирующий</th>
+                        <th>Типы</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in history %}
+                    <tr>
+                        <td><img src="/static/img/thumb_{{ row.filename }}" class="table-image"></td>
+                        <td>{{ row.age }}</td>
+                        <td>{{ row.gender }}</td>
+                        <td>{{ row.allergies }}</td>
+                        <td>{{ row.label }}</td>
+                        <td>{{ row.probs }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
     </div>
 
     <script>
@@ -118,37 +120,38 @@
                                 return;
                             }
 
-                            let html = `<h3>Результат анализа</h3>
-                                        <p><strong>Тип кожи:</strong> ${response.probs}</p>
-                                        <p><strong>Доминирующий тип:</strong> ${response.label}</p>
-                                        <p><strong>Рекомендации по уходу:</strong><p/>
+                            let resultHtml = `<h3>Результат анализа</h3>
+                                            <p><strong>Тип кожи:</strong> ${response.probs}</p>
+                                            <p><strong>Доминирующий тип:</strong> ${response.label}</p>
+                                            <p><strong>Рекомендации по уходу:</strong><p/>
                                             <p>${response.receipt}</p>`;
+                            $('#result').html(resultHtml);
 
-                            html += `<h3>История</h3>
-                                     <table>
-                                         <thead>
-                                             <tr>
-                                                 <th>Фото</th>
-                                                 <th>Возраст</th>
-                                                 <th>Пол</th>
-                                                 <th>Аллергия</th>
-                                                 <th>Доминирующий</th>
-                                                 <th>Типы</th>
-                                             </tr>
-                                         </thead>
-                                         <tbody>`;
+                            let historyHtml = `<h3>История</h3>
+                                             <table>
+                                                 <thead>
+                                                     <tr>
+                                                         <th>Фото</th>
+                                                         <th>Возраст</th>
+                                                         <th>Пол</th>
+                                                         <th>Аллергия</th>
+                                                         <th>Доминирующий</th>
+                                                         <th>Типы</th>
+                                                     </tr>
+                                                 </thead>
+                                                 <tbody>`;
                             response.history.forEach(row => {
-                                html += `<tr>
-                                            <td><img src="/static/img/thumb_${row.filename}" class="table-image"></td>
-                                            <td>${row.age}</td>
-                                            <td>${row.gender}</td>
-                                            <td>${row.allergies}</td>
-                                            <td>${row.label}</td>
-                                            <td>${row.probs}</td>
-                                         </tr>`;
+                                historyHtml += `<tr>
+                                                  <td><img src="/static/img/thumb_${row.filename}" class="table-image"></td>
+                                                  <td>${row.age}</td>
+                                                  <td>${row.gender}</td>
+                                                  <td>${row.allergies}</td>
+                                                  <td>${row.label}</td>
+                                                  <td>${row.probs}</td>
+                                               </tr>`;
                             });
-                            html += '</tbody></table>';
-                            $('#result').html(html);
+                            historyHtml += '</tbody></table>';
+                            $('#history').html(historyHtml);
                         },
                         error: function(xhr) {
                             const errorMsg = xhr.responseJSON?.error || 'Неизвестная ошибка при анализе';
