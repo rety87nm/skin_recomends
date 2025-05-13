@@ -73,7 +73,8 @@
 
                         let html = `<h3>Результат анализа</h3>
                                     <p><strong>Тип кожи:</strong> ${response.probs}</p>
-                                    <p><strong>Доминирующий тип:</strong> ${response.label}</p>`;
+                                    <p><strong>Доминирующий тип:</strong> ${response.label}</p>
+                                    <p><strong>Рекомендации по уходу:</strong> ${response.receipt}</p>`;
 
                         html += `<h3>История</h3>
                                  <table>

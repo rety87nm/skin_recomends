@@ -15,6 +15,19 @@ sc = SkinTypeChecker(config.model_path)
 UPLOAD_FOLDER = 'temp'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+def age_parts(age):
+    age = int(age)
+    if age < 20:
+        return 1
+    elif age < 40:
+        return 2
+    elif age < 60:
+        return 3
+    elif age < 80:
+        return 4
+    else:
+        return 5
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -52,7 +65,9 @@ def handler():
         if not all([age, gender, allergies, filename]):
             return jsonify({'error': 'Не все данные заполнены'}), 400
 
-        #analyze
+
+
+        #Анализ фотографии на тип кожи
         label, class_id, probs = sc.analyze(filename)
         ru_label = sc.ru_classes[class_id]
 
@@ -61,25 +76,29 @@ def handler():
         #sqlite
         conn = sqlite3.connect('data.db')
         cursor = conn.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS analysis_results (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                age INTEGER,
-                gender TEXT,
-                allergies TEXT,
-                label TEXT,
-                probs TEXT,
-                filename TEXT
-            )
-        ''')
+
+        Q = 'SELECT id FROM texts where age_part = ? and gender = ? and dom_type = ?';
+        P = [age_parts(age), gender, ru_label]
+        
+        if allergies == 'нет':
+            Q += ' and allergen is NULL'
+        else:
+            Q += ' and allergen = ? '
+            P.append(allergies)
+
+        cursor.execute( Q, P)
+        rows = cursor.fetchall()
+        text_id = int( rows[0][0] )
+
         cursor.execute(
-            'INSERT INTO analysis_results (label, probs, age, gender, allergies, filename) VALUES (?, ?, ?, ?, ?, ?)',
-            (ru_label, probs_str, age, gender, allergies, filename)
+            'INSERT INTO analysis_results (label, probs, age, gender, allergies, filename, text_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            (ru_label, probs_str, age, gender, allergies, filename, text_id)
         )
         conn.commit()
 
-        # Получаем всю историю
-        cursor.execute('SELECT id, age, gender, allergies, label, probs FROM analysis_results ORDER BY id DESC')
+        # Получаем 10 последних сообщений 
+        cursor.execute('SELECT ar.id, ar.age, ar.gender, ar.allergies, ar.label, ar.probs, t.text FROM analysis_results as ar, texts as t on t.id = ar.text_id ORDER BY ar.id DESC limit 10;')
+
         rows = cursor.fetchall()
         conn.close()
 
@@ -90,7 +109,8 @@ def handler():
                 'gender': row[2],
                 'allergies': row[3],
                 'label': row[4],
-                'probs': row[5]
+                'probs': row[5],
+                'receipt':row[6]
             }
             for row in rows
         ]
@@ -98,13 +118,13 @@ def handler():
         result = {
             'label': ru_label,
             'probs': probs_str,
+            'receipt':history[0]['receipt'],
             'history': history
         }
 
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=4100)
