@@ -68,6 +68,7 @@
                         <th>Аллергия</th>
                         <th>Доминирующий</th>
                         <th>Типы</th>
+                        <th>Посмотреть результат</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -79,6 +80,11 @@
                         <td>{{ row.allergies }}</td>
                         <td>{{ row.label }}</td>
                         <td>{{ row.probs }}</td>
+                        <td>
+                          <button onclick="showReceipt('{{ row.receipt | replace('\n', '<br>') | replace('\"', '&quot;') | safe }}')">
+                            Посмотреть
+                          </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -151,10 +157,12 @@
                                                          <th>Аллергия</th>
                                                          <th>Доминирующий</th>
                                                          <th>Типы</th>
+                                                         <th>Посмотреть рекомендацию</th>
                                                      </tr>
                                                  </thead>
                                                  <tbody>`;
                             response.history.forEach(row => {
+                                const safeReceipt = row.receipt.replace(/"/g, '&quot;').replace(/\n/g, '<br>');
                                 historyHtml += `<tr>
                                                   <td><img src="/static/img/thumb_${row.filename}" class="table-image"></td>
                                                   <td>${row.age}</td>
@@ -162,6 +170,7 @@
                                                   <td>${row.allergies}</td>
                                                   <td>${row.label}</td>
                                                   <td>${row.probs}</td>
+                                                  <td><button onclick="showReceipt('${safeReceipt}')">Посмотреть</button></td>
                                                </tr>`;
                             });
                             historyHtml += '</tbody></table>';
@@ -179,6 +188,15 @@
                 }
             });
         });
+    </script>
+
+    <script>
+        function showReceipt(text) {
+            $('#result').html(`
+                <h3>Рекомендации по уходу</h3>
+                <p>${text}</p>
+            `);
+        }
     </script>
 </body>
 </html>

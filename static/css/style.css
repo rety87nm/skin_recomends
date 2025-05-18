@@ -5,7 +5,7 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 750px;
     margin: auto;
     background: white;
     padding: 20px;
@@ -90,7 +90,7 @@ table th {
 }
 
 .header-bar {
-    max-width: 600px;
+    max-width: 750px;
     background: white;
     padding: 20px;
     border-radius: 12px;

@@ -200,7 +200,7 @@ def handler():
             Q += ' and allergen = ? '
             P.append(allergies)
 
-        cursor.execute( Q, P)
+        cursor.execute(Q, P)
         rows = cursor.fetchall()
         text_id = int( rows[0][0] )
 
@@ -218,7 +218,7 @@ def handler():
         result = {
             'label': ru_label,
             'probs': probs_str,
-            'receipt':history[0]['receipt'].replace("\n", "<br>"),
+            'receipt': history[0]['receipt'].replace("\n", "<br>"),
             'history': history
         }
 
