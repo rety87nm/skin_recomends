@@ -4,12 +4,25 @@
     <meta charset="UTF-8">
     <title>Рекомендации по уходу за кожей</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts/boxicons.css') }}">
+
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Рекомендации по уходу за кожей</h1>
 
+
+    <div class="header-bar">
+        <div class="title">Рекомендации по уходу за кожей</div>
+        <div class="user-info">
+            Привет, <span> {{ current_user.username }} </span>
+            <a href="{{ url_for('logout') }}" title="Выйти">
+                 <i class="bx bx-power-off me-2"></i>
+            </a>
+        </div>
+    </div>
+
+
+    <div class="container">
         <form id="uploadForm" enctype="multipart/form-data">
             <label>Загрузите фотографию:</label>
             <input type="file" name="image" id="imageInput" accept="image/*" required><br>
@@ -73,6 +86,7 @@
             {% endif %}
         </div>
     </div>
+
 
     <script>
         // Предпросмотр изображения
