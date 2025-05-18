@@ -38,7 +38,7 @@ def get_user_by_username(login):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT * FROM users WHERE username = ? OR email = ?", (login, login))
+        cursor.execute("SELECT * FROM users WHERE email = ?", (login,))
         user_data = cursor.fetchone()
         if user_data:
             return User(

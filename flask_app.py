@@ -88,10 +88,11 @@ def register():
 
         conn = sqlite3.connect('data.db')
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE username = ? OR email = ?", (username, email))
+        cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
         if cursor.fetchone():
-            flash('Пользователь с таким логином или email уже существует.','error')
-            return redirect(url_for('register'))
+            flash('Пользователь с таким email уже существует.','error')
+            return render_template('register.html',
+                                   form_data=request.form)
 
         hashed_password = generate_password_hash(password)
         cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
@@ -99,7 +100,7 @@ def register():
         conn.commit()
         conn.close()
 
-        user = get_user_by_username(username)
+        user = get_user_by_username(email)
         if user and check_password(user, password):
             login_user(user, remember=True)
             return redirect(url_for('index'))
