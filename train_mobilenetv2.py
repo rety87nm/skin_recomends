@@ -46,6 +46,8 @@ def imshow(inp, title=None, plt_ax=plt, default=False):
     plt_ax.grid(False)
 
 
+
+
 # уникализируем все изображения:
 source_data_path = Path( "/home/alexx/deep_learning/data/skin_types/train/" )
 clear_data_path = "/home/alexx/deep_learning/data/uniq/skin_types/train/"
@@ -181,6 +183,9 @@ def validate(model, valid_loader):
 # отобразить графики последнего обучения
 def show_metrix(out_metrix, title=""):
     # строим графики Precision, recall, accuracy:
+    img_plot_acc = "./accuracy.png"
+    img_plot_loss = "./loss.png"
+
     fig1, ax1 = plt.subplots()
     ax1.plot(out_metrix['acc'], label='Accuracy' )
     ax1.set_title(f"График точности предсказаний {title}")
@@ -188,6 +193,7 @@ def show_metrix(out_metrix, title=""):
     ax1.set_ylabel('Точность (%)')
     ax1.grid(True)
     ax1.legend()
+    plt.savefig(img_plot_acc, bbox_inches='tight', pad_inches=0)
 
     # отслеживаем значения loss функции
     fig2, ax2 = plt.subplots()
@@ -198,6 +204,7 @@ def show_metrix(out_metrix, title=""):
     ax2.plot(out_metrix['vloss'], label='Valid Loss' )
     ax2.grid(True)
     ax2.legend()
+    plt.savefig(img_plot_loss, bbox_inches='tight', pad_inches=0)
     plt.show()
 
 # функция тренировки модели:
