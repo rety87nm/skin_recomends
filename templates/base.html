@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Рекомендации по уходу за кожей</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts/boxicons.css') }}">
+
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+</head>
+<body>
+
+
+    <div class="header-bar">
+        <div class="title">Рекомендации по уходу за кожей</div>
+        {% if current_user.is_authenticated %}
+            <div class="user-info">
+                Привет, <span> {{ current_user.username }} </span>
+                <a href="{{ url_for('logout') }}" title="Выйти">
+                    <i class="bx bx-power-off me-2"></i>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+ {% block content %}
+ {% endblock %}
+
+</body>
+</html>

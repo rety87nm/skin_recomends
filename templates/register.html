@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container">
+        <h1>Регистрация</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label>Имя пользователя:</label>
+            <input type="text" name="username" required value="{{ form_data.username if form_data else '' }}">
+
+            <label>Email:</label>
+            <input type="email" name="email" required value="{{ form_data.email if form_data else '' }}">
+
+            <label>Пароль:</label>
+            <input type="password" name="password" required>
+
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
+    </div>
+
+
+{% endblock %}

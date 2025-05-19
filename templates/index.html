@@ -1,15 +1,9 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Рекомендации по уходу за кожей</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-</head>
-<body>
-    <div class="container">
-        <h1>Рекомендации по уходу за кожей</h1>
+{% extends 'base.html' %}
 
+{% block content %}
+
+
+    <div class="container">
         <form id="uploadForm" enctype="multipart/form-data">
             <label>Загрузите фотографию:</label>
             <input type="file" name="image" id="imageInput" accept="image/*" required><br>
@@ -55,6 +49,7 @@
                         <th>Аллергия</th>
                         <th>Доминирующий</th>
                         <th>Типы</th>
+                        <th>Посмотреть результат</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -66,6 +61,11 @@
                         <td>{{ row.allergies }}</td>
                         <td>{{ row.label }}</td>
                         <td>{{ row.probs }}</td>
+                        <td>
+                          <button onclick="showReceipt('{{ row.receipt | replace('\n', '<br>') | replace('\"', '&quot;') | safe }}')">
+                            Посмотреть
+                          </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -73,6 +73,7 @@
             {% endif %}
         </div>
     </div>
+
 
     <script>
         // Предпросмотр изображения
@@ -137,10 +138,12 @@
                                                          <th>Аллергия</th>
                                                          <th>Доминирующий</th>
                                                          <th>Типы</th>
+                                                         <th>Посмотреть рекомендацию</th>
                                                      </tr>
                                                  </thead>
                                                  <tbody>`;
                             response.history.forEach(row => {
+                                const safeReceipt = row.receipt.replace(/"/g, '&quot;').replace(/\n/g, '<br>');
                                 historyHtml += `<tr>
                                                   <td><img src="/static/img/thumb_${row.filename}" class="table-image"></td>
                                                   <td>${row.age}</td>
@@ -148,6 +151,7 @@
                                                   <td>${row.allergies}</td>
                                                   <td>${row.label}</td>
                                                   <td>${row.probs}</td>
+                                                  <td><button onclick="showReceipt('${safeReceipt}')">Посмотреть</button></td>
                                                </tr>`;
                             });
                             historyHtml += '</tbody></table>';
@@ -166,5 +170,14 @@
             });
         });
     </script>
-</body>
-</html>
+
+    <script>
+        function showReceipt(text) {
+            $('#result').html(`
+                <h3>Рекомендации по уходу</h3>
+                <p>${text}</p>
+            `);
+        }
+    </script>
+
+{% endblock %}
